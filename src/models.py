@@ -7,26 +7,51 @@ from eralchemy2 import render_er
 
 Base = declarative_base()
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
+class User(Base):
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
+    favorites = relationship("Favorites", back_populates="user")
+    post = relationship("Post", back_populates="user")
+    close_friends = relationship("CloseFriends", back_populates="user")
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
+class Favorites(Base):
+    __tablename__ = 'favorites'
     id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
-
+    title = Column(String(250), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship("User", back_populates="favorites")
     def to_dict(self):
-        return {}
+        return {
+            'id': self.id,
+            'title': self.title
+        }
+
+class Post(Base):
+    __tablename__ = 'post'
+    id = Column(Integer, primary_key=True)
+    title = Column(String(250), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship("User", back_populates="favorites")
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title
+        }
+
+class CloseFriends(Base):
+    __tablename__ = 'close friends'
+    id = Column(Integer, primary_key=True)
+    title = Column(String(250), nullable=False)
+    name = Column(String(250), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship("User", back_populates="favorites")
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'title': self.title
+        }
 
 ## Draw from SQLAlchemy base
 try:
